@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 const CrudPlans = () => {
   const [plans, setPlans] = useState([]);
   const [name,setName] = useState('');
-  const [prices,setPrices] = useState()
-const [maxUsers,setMaxUsers] = useState()
-const [descriptions,setDescriptions] = useState()
+  const [prices,setPrices] = useState('')
+const [maxUsers,setMaxUsers] = useState('')
+const [descriptions,setDescriptions] = useState('')
 
 useEffect(() => {
   fetchPlans();
@@ -48,20 +48,30 @@ useEffect(() => {
     }
 
     const data = await response.json();
-    console.log(data);
   } catch (error) {
     console.error('Error:', error);
     alert('An error occurred while creating the plan.');
   }
 };
-
+const UpdateFormData={
+  name:name,
+  price:prices,
+  maxUsers:maxUsers,
+  features:descriptions  
+}
+const filteredData = Object.fromEntries(
+  Object.entries(UpdateFormData).filter(([_, value]) => value !== undefined && value !== null && value !== "")
+);
   const handleUpdate = async (e,id) => {
     e.preventDefault()
     try {
-      await fetch(`http://localhost:5000/api/plans/${id}`, { method: 'PUT' ,
+    const response=  await fetch(`http://localhost:5000/api/plans/${id}`, { method: 'PATCH' ,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(filteredData),
       });
+      if(response.ok){
+        alert('plan edited successfully')
+      }
   await fetchPlans();
     } catch (error) {
       alert(error.message);
@@ -71,8 +81,11 @@ useEffect(() => {
   const handleDelete = async (e,id) => {
     e.preventDefault()
     try {
-      await fetch(`http://localhost:5000/api/plans/${id}`, { method: 'DELETE' });
-      await fetchPlans();
+    const response=  await fetch(`http://localhost:5000/api/plans/${id}`, { method: 'DELETE' });
+    if(response.ok){
+      alert("Plan deleted successfully")
+    }  
+    await fetchPlans();
     } catch (error) {
       alert(error.message);
     }
@@ -136,7 +149,6 @@ useEffect(() => {
     <>
  <div className="mt-4 px-4 text-xl">
  <p>Plan Name : {plan.name}</p>
-<p>{plan._id}</p>
  <p>Plan Price : {plan.price}</p>
  <p>Plan Features : {plan.features}</p>
  <button onClick={(e)=>{handleUpdate(e,plan._id)}}>Edit</button> <button onClick={(e)=>{handleDelete(e,plan._id)}}>Delete</button>
